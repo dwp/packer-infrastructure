@@ -179,3 +179,6 @@ Burbank Team
 ## Author
 
 * **Stuart Tansley**
+
+[Contribution guidelines for this project](CONTRIBUTING.md)
+
