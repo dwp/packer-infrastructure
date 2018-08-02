@@ -172,6 +172,9 @@ An IAM role [ https://www.packer.io/docs/builders/amazon.html#using-an-iam-insta
 
 Cloudwatch should be implemented, only 3 days logs are maintained on the server. *** Needs to be templated to grab anything in /var/log/*
 
+## Maintainer
+
+Burbank Team
 
 ## Author
 
