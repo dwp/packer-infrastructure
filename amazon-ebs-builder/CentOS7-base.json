@@ -1,0 +1,58 @@
+{
+  "description": "AMI Builder for CentOS 7 EC2",
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "region": "eu-west-2",
+    "vpc_id": "vpc-XXXXXX",
+    "subnet_id": "subnet-XXXXXX",
+    "owner_name": "XXXXXX",
+    "type": "base",
+    "os_name": "centos",
+    "os_version": "7",
+    "volume_size": "20G",
+    "name": "Base CentOS 7",
+		"description": "Resized & Patched Official CentOS 7 Image"
+  },
+
+  "builders": [{
+      "type": "amazon-ebs",
+      "region": "{{user `aws_region`}}",
+      "instance_type": "t2.micro",
+      "vpc_id": "{{user `vpc_id`}}",
+      "subnet_id": "{{user `subnet_id`}}",
+      "ami_name": "{{user `owner_name`}}-{{user `os_name`}}-{{user `os_version`}}-{{user `type`}}-{{isotime \"2006-01-02-030405\" | clean_ami_name}}",
+      "ami_description": "{{user `type`}} CentOS Linux 7 x86_64 HVM EBS (encrypted) {{isotime \"20060102\"}}",
+      "source_ami_filter": {
+          "filters": {
+              "name": "CentOS Linux 7 x86_64 HVM EBS*",
+              "owner-alias": "aws-marketplace",
+              "virtualization-type": "hvm"
+            },
+          "most_recent": true
+        },
+
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_type": "gp2",
+          "volume_size": "{{user `volume_size`}}",
+          "encrypted": true,
+          "delete_on_termination": true
+        }
+      ],
+      "ami_virtualization_type": "hvm",
+      "ssh_username": "centos",
+      "ssh_pty": true,
+      "associate_public_ip_address": false
+          }],
+
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sudo yum clean all",
+      "sudo yum update -y",
+      "sudo yum clean all"
+    ]
+  }]
+}

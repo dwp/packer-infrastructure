@@ -1,0 +1,99 @@
+{
+	"min_packer_version": "1.2.3",
+	"variables": {
+		"aws_access_key": "",
+		"aws_secret_key": "",
+		"aws_session_token": "",
+		"aws_accountid": "XXXXXX",
+		"owner_name": "XXXXXX",
+		"type": "ecs",
+		"os_name": "centos",
+		"os_version": "7",
+		"minor_version": ".5.1804",
+		"mirror_source": "http://mirror.centos.org/centos/",
+		"docker_version": "17.12.1",
+		"aws_instance_type": "t2.micro",
+		"ntp_source": "XXXXXX",
+		"internal_cidr": "XXXXXX",
+		"ipv4_forward": "1",
+		"app_ports": "XXXXXX,XXXXXX,XXXXXX:XXXXXX",
+		"aws_networks": "XXXXXX",
+		"ssh_allow": "centos XXXXXX XXXXXX ec2-user",
+		"name": "ecs CentOS 7 miminal",
+		"description": "ecs CentOS 7"
+	},
+    "builders": [
+        {
+            "type": "amazon-ebs",
+						"ami_name": "{{user `owner_name`}}-{{user `os_name`}}-{{user `os_version`}}-{{user `type`}}-{{isotime \"2006-01-02-030405\" | clean_ami_name}}",
+			      "ami_description": "{{user `type`}} CentOS Linux 7 x86_64 HVM EBS (encrypted) {{isotime \"20060102\"}}",
+            "instance_type": "t2.small",
+						"vpc_id": "vpc-XXXXXX",
+						"subnet_id": "subnet-XXXXXX",
+            "region": "eu-west-2",
+            "source_ami_filter": {
+                "filters": {
+                    "name": "XXXXXX-centos-7-base*",
+                    "virtualization-type": "hvm"
+                  },
+								"owners": "{{user `aws_accountid`}}",
+                "most_recent": true
+            },
+            "ami_virtualization_type": "hvm",
+            "ssh_username": "centos",
+            "ssh_file_transfer_method": "sftp",
+            "associate_public_ip_address": false,
+            "tags": {
+                "Name": "{{user `ami_name` | clean_ami_name}}",
+                "OS": "CentOS",
+                "OSVER": "7"
+            },
+            "encrypt_boot": true,
+            "ami_block_device_mappings": [
+                {
+                    "device_name": "/dev/sda1",
+                    "volume_type": "gp2",
+                    "volume_size": 20,
+                    "encrypted": true,
+                    "delete_on_termination": true
+                }
+            ],
+            "communicator": "ssh",
+            "ssh_pty": true
+        }
+    ],
+    "provisioners": [
+      {
+			"environment_vars": [
+				  "FULL_VERSION={{user `os_version`}}{{user `minor_version`}}",
+					"MIRROR_URL={{user `mirror_source`}}",
+					"NTP_SOURCE={{user `ntp_source`}}",
+					"IP_RANGE={{user `internal_cidr`}}",
+					"IPV4FORWARD={{user `ipv4_forward`}}",
+					"APP_PORTS={{user `app_ports`}}",
+					"AWS={{user `aws_networks`}}",
+					"SSH_ALLOW={{user `ssh_allow`}}",
+					"DOCKER_VERSION={{user `docker_version`}}"
+				],
+      "type": "shell",
+      "expect_disconnect": "true",
+			"pause_before": "20s",
+      "execute_command": "echo 'centos'| {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "start_retry_timeout": "15m",
+      "scripts": [
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/000-base.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/010-packages.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/020-config.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/030-services.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/040-network.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/050-cloud-init.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/060-grub.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/070-monitoring.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/090-harden.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/066-docker.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/096-iptables.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/100-cleanup.sh"
+      ]
+      }
+    ]
+    }
