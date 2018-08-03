@@ -33,7 +33,7 @@ We have not applied the following CIS Recommendations:
 
 [generic scripts](amazon-ebs-builder/scripts/centos7/generic) - These scripts run on every build.
 
-* 000-bash.sh - pushes out a kickstart file, reboots the server and lays down the CoreOS. This includes the following LVM partitioning:
+* 000-bash.sh - pushes out a kickstart file, reboots the server and lays down the base operating system. This includes the following LVM partitioning:
 
 | Mount Point   | Size          |  
 | ------------- | ------------- |
