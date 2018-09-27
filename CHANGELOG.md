@@ -16,3 +16,10 @@ All notable changes to this project will be documented in this file.
 ## [1.0.2] - 02/08/2018
 ### Added
 -  CONTRIBUTING.md linked in README.md
+
+## [1.0.3] - 27/09/2018
+### Added
+- Amended log rotate from 3 to 1 in 090-harden.sh.
+- Applied CIS Docker Community Edition Benchmark (v1.1.0 - 07-06-2017) hardening to CentOS7-ecs.json build.
+- Added docker-builder to perform alpine container builds for Java Microservices, NodeJS, hashicorp vault and consul.
+- Updated README to reflect the above changes/additions.

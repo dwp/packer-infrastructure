@@ -1,0 +1,9 @@
+{
+"family": "hashicorp",
+"license": "opensource",
+"version": "0.11.1",
+"app_name":"vault",
+"ports": "8200-8201",
+"volumes": "/vault/logs /vault/file",
+"hashicorp_gpgkey": "XXXXXXXXXXXXXXXXX"
+}

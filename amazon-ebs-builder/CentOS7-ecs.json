@@ -19,6 +19,7 @@
 		"app_ports": "XXXXXX,XXXXXX,XXXXXX:XXXXXX",
 		"aws_networks": "XXXXXX",
 		"ssh_allow": "centos XXXXXX XXXXXX ec2-user",
+		"guid": "XXXX",
 		"name": "ecs CentOS 7 miminal",
 		"description": "ecs CentOS 7"
 	},
@@ -39,7 +40,7 @@
 								"owners": "{{user `aws_accountid`}}",
                 "most_recent": true
             },
-            "ami_virtualization_type": "hvm",
+						"ami_virtualization_type": "hvm",
             "ssh_username": "centos",
             "ssh_file_transfer_method": "sftp",
             "associate_public_ip_address": false,
@@ -49,20 +50,31 @@
                 "OSVER": "7"
             },
             "encrypt_boot": true,
+        		"launch_block_device_mappings": [{
+            			"device_name": "/dev/sde",
+            			"volume_size": 50,
+            			"volume_type": "gp2",
+          			  "delete_on_termination": true
+        		}],
             "ami_block_device_mappings": [
                 {
                     "device_name": "/dev/sda1",
                     "volume_type": "gp2",
-                    "volume_size": 20,
+                    "volume_size": 25,
                     "encrypted": true,
                     "delete_on_termination": true
-                }
-            ],
-            "communicator": "ssh",
-            "ssh_pty": true
-        }
-    ],
-    "provisioners": [
+										},{
+										"device_name": "/dev/sde",
+	            			"volume_size": 50,
+	            			"volume_type": "gp2",
+	            			"delete_on_termination": true
+									}
+	            ],
+	            "communicator": "ssh",
+	            "ssh_pty": true
+	        }
+	    ],
+			"provisioners": [
       {
 			"environment_vars": [
 				  "FULL_VERSION={{user `os_version`}}{{user `minor_version`}}",
@@ -70,10 +82,7 @@
 					"NTP_SOURCE={{user `ntp_source`}}",
 					"IP_RANGE={{user `internal_cidr`}}",
 					"IPV4FORWARD={{user `ipv4_forward`}}",
-					"APP_PORTS={{user `app_ports`}}",
-					"AWS={{user `aws_networks`}}",
-					"SSH_ALLOW={{user `ssh_allow`}}",
-					"DOCKER_VERSION={{user `docker_version`}}"
+					"SSH_ALLOW={{user `ssh_allow`}}"
 				],
       "type": "shell",
       "expect_disconnect": "true",
@@ -89,11 +98,43 @@
 				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/050-cloud-init.sh",
 				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/060-grub.sh",
 				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/070-monitoring.sh",
-				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/090-harden.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/090-harden.sh"
+			]
+			},
+	{
+			"type": "shell",
+			"execute_command": "echo 'centos'| {{.Vars}} sudo -S -E bash '{{.Path}}'",
+			"inline": [
+				"sudo parted --script /dev/xvde mkpart primary 0% 100%",
+			  "sudo vgcreate vg01 /dev/xvde1",
+			  "sudo lvcreate -l 100%FREE -n varlibd vg01",
+			  "sudo mkfs -t xfs /dev/vg01/varlibd"		]
+        },
+				{
+		      "type": "file",
+		      "source": "files/user_namespace.pp",
+		      "destination": "/tmp/user_namespace.pp"
+		    },
+    {
+			"environment_vars": [
+					"NTP_SOURCE={{user `ntp_source`}}",
+					"IP_RANGE={{user `internal_cidr`}}",
+					"AWS={{user `aws_networks`}}",
+					"APP_PORTS={{user `app_ports`}}",
+					"DOCKER_VERSION={{user `docker_version`}}",
+					"OWNER={{user `owner_name`}}",
+					"GUID={{user `guid`}}"
+				],
+      "type": "shell",
+			"expect_disconnect": "true",
+			"pause_before": "20s",
+			"execute_command": "echo 'centos'| {{.Vars}} sudo -S -E bash '{{.Path}}'",
+			"scripts": [
 				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/066-docker.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/076-harden-ecs.sh",
 				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/096-iptables.sh",
 				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/100-cleanup.sh"
-      ]
-      }
     ]
-    }
+	}
+]
+}

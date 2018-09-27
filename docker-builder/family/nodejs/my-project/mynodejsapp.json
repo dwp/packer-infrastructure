@@ -1,0 +1,9 @@
+{
+"family": "nodejs",
+"image": "alpine:3.8",
+"node_version": "v8.9.4",
+"project" : "my-project",
+"app_name":"mynodejsapp",
+"version":"1.2.3",
+"ports": "9060"
+}

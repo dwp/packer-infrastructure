@@ -1,0 +1,81 @@
+{
+  "variables": {
+    "account": "{{env `account`}}",
+    "family": "{{env `family`}}",
+    "app_name": "{{env `app_name`}}",
+    "license": "{{ env `license`}}",
+    "version": "{{env `version`}}",
+    "user": "{{env `user`}}",
+    "group": "{{ env `group`}}",
+    "uid": "{{ env `uid`}}",
+    "gid": "{{ env `gid`}}",
+    "ports": "{{ env `ports`}}",
+    "volumes": "{{ env `volumes`}}",
+    "hashicorp_gpgkey": "{{env `hashicorp_gpgkey`}}",
+    "keep_users": "{{env `user`}}|"
+  },
+  "builders": [
+    {
+      "type": "docker",
+      "image": "alpine:latest",
+      "run_command": ["-d", "-i", "-t", "{{.Image}}", "/bin/ash"],
+      "commit": true,
+      "changes": [
+      "VOLUME {{user `volumes`}}",
+      "ENTRYPOINT [\"/usr/local/bin/docker-entrypoint.sh\"]",
+      "EXPOSE {{user `ports`}}",
+      "USER {{user `user`}}"
+    ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "environment_vars": [
+      "license={{user `license`}}",
+      "version={{user `version`}}",
+      "gid={{user `gid`}}",
+      "uid={{user `uid`}}",
+      "user={{user `user`}}",
+      "group={{user `group`}}",
+      "hashicorp_gpgkey={{user `hashicorp_gpgkey`}}"
+      ],
+      "scripts": [
+        "scripts/{{user `family`}}/{{user `app_name`}}.sh"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "files/{{user `family`}}/{{user `app_name`}}/docker-entrypoint.sh",
+      "destination": "/usr/local/bin/docker-entrypoint.sh"
+    },
+    {
+      "type": "shell",
+      "inline": ["chmod +x /usr/local/bin/docker-entrypoint.sh && chown {{user `user`}}:{{user `group`}} /usr/local/bin/docker-entrypoint.sh"]
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+      "USER={{user `user`}}",
+      "APP_NAME={{user `app_name`}}"
+      ],
+      "scripts": [
+        "scripts/base/harden.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "{{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com/{{user `project`}}-{{user `app_name`}}",
+        "tag": "{{ user `version`}}-{{ user `license` }}"
+      },
+      {
+        "type": "docker-push",
+        "ecr_login": true,
+        "login_server": "https://{{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com"
+      }
+    ]
+  ]
+}

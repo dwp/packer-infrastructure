@@ -11,19 +11,18 @@ yum-config-manager --enable docker-ce-edge
 
 yum-config-manager --enable docker-ce-test
 
+## 1.1 Ensure a separate partition for containers has been created
+echo "Creating seperate partition for Docker..."
+
+echo "/dev/mapper/vg01-varlibd /var/lib/docker        xfs     defaults        0 0" >> /etc/fstab
+
+mkdir /var/lib/docker
+
+mount -a
+
 # Install Docker
 yum install -y --setopt=obsoletes=0 \
         docker-ce-${DOCKER_VERSION}.ce-1.el7.centos
-
-# Download cadvisor & node_exporter
-
-curl -sL https://github.com/prometheus/node_exporter/releases/download/v${version_ne}/node_exporter-${version_ne}.linux-amd64.tar.gz |tar -zxvf - -C /usr/sbin/ --strip-components=1 node_exporter-${version_ne}.linux-amd64/node_exporter
-
-curl -sL https://github.com/google/cadvisor/releases/download/v${version_ca}/cadvisor -o /usr/sbin/cadvisor
-
-chmod 755 /usr/sbin/node_exporter /usr/sbin/cadvisor
-
-chown root:root /usr/sbin/node_exporter /usr/sbin/cadvisor
 
 # Create directories for ECS agent
 mkdir -p /var/log/ecs /var/lib/ecs/data /etc/ecs

@@ -592,7 +592,7 @@ chown root:root /etc/group-
 echo "Ensure Logrotate Runs Periodically..."
 sed -i "s/weekly/daily/g" /etc/logrotate.conf
 sed -i "s/monthly/weekly/g" /etc/logrotate.conf
-sed -i "s/rotate 4/rotate 3/g" /etc/logrotate.conf
+sed -i "s/rotate 4/rotate 1/g" /etc/logrotate.conf
 
 echo "Disallow direct root logins.."
 

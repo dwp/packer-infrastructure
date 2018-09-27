@@ -21,6 +21,7 @@ $IPT -t mangle -X
 
 echo "Set local DHCP"
 $IPT -A INPUT -p udp -m udp --dport 67:78 -j ACCEPT
+$IPT -A OUTPUT -p udp -m udp --dport 67:78 -j ACCEPT
 
 ## Allow DNS looksups in AWS
 for ip in $IP_RANGE
