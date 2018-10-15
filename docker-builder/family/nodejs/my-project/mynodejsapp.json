@@ -1,6 +1,6 @@
 {
 "family": "nodejs",
-"image": "alpine:3.8",
+"image": "node:8.12.0-alpine",
 "node_version": "v8.9.4",
 "project" : "my-project",
 "app_name":"mynodejsapp",

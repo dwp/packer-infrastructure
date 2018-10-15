@@ -20,6 +20,8 @@
       "run_command": ["-d", "-i", "-t", "{{.Image}}", "/bin/ash"],
       "commit": true,
       "changes": [
+      "ENV APP {{user `project`}}-{{user `app_name`}}",
+      "ENV VERSION={{user `version`}}",
       "USER {{user `user`}}",
       "LABEL MAINTAINER {{user `maintainer`}}",
       "EXPOSE {{user `ports`}}",
