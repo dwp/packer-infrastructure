@@ -1,0 +1,36 @@
+authenticationServer: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.authenticationServer }}{{ end }}
+persistenceServerURL: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.persistenceServer }}{{ end }}
+userServiceServerURL: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.userServiceServer }}{{ end }}
+casesServiceServerURL: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.casesServiceServer }}{{ end }}
+queueSeederServerURL: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.queueSeederServer }}{{ end }}
+sdpCheckerServerURL: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.sdpCheckerServer }}{{ end }}
+keystorePath: /opt/burbank/jks/truststore.jks
+keystorePassword: {{ file "/home/burbank/.jks_truststore" }}
+useHttps : {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.useHttps }}{{ end }}
+# Logging settings.
+logging:
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: {{ env "LOG_LEVEL" | toUpper }}
+  # Logger-specific levels.
+  loggers:
+    # Sets the level for 'com.example.app' to DEBUG.
+    com.example.app: DEBUG
+# Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
+# Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
+# Logback's Fixed Window Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%i.log.gz
+  appenders:
+    - type: console
+server:
+  applicationConnectors:
+  - type: https
+    port: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.applicationPort }}{{ end }}
+    keyStorePath: /opt/burbank/jks/server-keystore.jks
+    keyStorePassword: {{ file "/home/burbank/.server_jks_keystore" }}
+    supportedProtocols: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.supportedProtocols }}{{ end }}
+    supportedCipherSuites: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.supportedCipherSuites }}{{ end }}
+    validateCerts: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.validateCerts }}{{ end }}
+  - type: http
+    port: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.httpAppPort }}{{ end }}
+  adminConnectors:
+    - type: http
+      port: {{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.AdminPort }}{{ end }}

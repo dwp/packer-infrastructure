@@ -1,9 +1,0 @@
-{
-"family": "hashicorp",
-"license": "opensource",
-"version": "1.2.2",
-"app_name":"consul",
-"ports": "8300 8301 8301/udp 8302 8302/udp 8500 8600 8600/udp",
-"volumes": "/consul/data",
-"hashicorp_gpgkey": "XXXXXXXXXXXXXXXXX"
-}

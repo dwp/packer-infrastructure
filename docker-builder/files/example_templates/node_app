@@ -1,0 +1,38 @@
+module.exports = {
+    apps : [{
+        name: "uc-transfers-controller",
+        script: "./app.js",
+        instances: "max",
+        exec_mode: "cluster",
+        watch: true,
+        ignore_watch: './dev',
+        env: {
+            "NODE_ENV": "development",
+            "NODE_URI": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.nodeUri }}{{ end }}",
+            "PORT": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.applicationPort }}{{ end }}",
+            "JWT_SECRET": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.jwtSecret }}{{ end }}",
+            "COOKIE_SECRET": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.cookieSecret }}{{ end }}",
+            "JWT_ISSUER_URL": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.jwtIssuerURL }}{{ end }}",
+            "NOTIFY_API_KEY": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.notifyApiKey }}{{ end }}",
+            "API_URI": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.apiUri }}{{ end }}",
+            "POSTCODE_API_URI": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.postcodeapiUri }}{{ end }}",
+            "AUTO_CLAIM_CLOSURE": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.autoClaimClosure }}{{ end }}",
+            "AUTO_LETTER_GENERATION": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.autoLetterGeneration }}{{ end }}",
+            "PDF_GENERATOR_URI": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.pdfgeneratorUri }}{{ end }}",
+            "PDF_GENERATION_SECRET": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.pdfgeneratorSecret }}{{ end }}",
+            "UC_FULL_SERVICE_URL": "{{ with secret "/secrets-PROJECT-ENVIRONMENT/APP" }}{{ .Data.ucfsUrl }}{{ end }}",
+            "CERT_FILE_PATH": "/opt/burbank/certs/server.cert",
+            "KEY_FILE_PATH": "/opt/burbank/key/server.key",
+            "CA_FILE_PATH": "/opt/burbank/ca.crt",
+            "API_CERT_FILE_PATH": "/opt/burbank/certs/server.cert",
+            "API_KEY_FILE_PATH": "/opt/burbank/key/server.key",
+            "API_CA_FILE_PATH": "/opt/burbank/ca.crt",
+            "CONTROLLER_CERT_FILE_PATH": "/opt/burbank/certs/server.cert",
+            "CONTROLLER_KEY_FILE_PATH": "/opt/burbank/key/server.key",
+            "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+        },
+        env_production: {
+            NODE_ENV: "production",
+        }
+    }]
+};

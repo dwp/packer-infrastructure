@@ -1,0 +1,7 @@
+{
+  "type": "infra-ecs",
+  "name": "????? Infra ECS Build",
+  "description": "Hardened Infra ECS build on CentOS 7 ECS - owned by Team ?????",
+  "app_ports": "9000:9100",
+  "ssh_allow": "centos group1 group2 ec2-user"
+}

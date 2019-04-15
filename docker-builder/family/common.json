@@ -1,8 +1,15 @@
 {
-"maintainer": "XXXXXXXXXXXX",
-"account": "123456789",
-"user": "XXXXXXXXXXXX",
-"group": "XXXXXXXXXXXX",
-"uid": "3100",
-"gid":" 3100"
+"maintainer": "UC DWP",
+"account": "123456789101",
+"internal_repo": "location",
+"owner": "joebloggs",
+"user": "joebloggs",
+"group": "joebloggs",
+"uid": "3999",
+"gid":" 3999",
+"consul_template_ver": "0.19.5",
+"vault_client_ver": "1.0.3",
+"license": "opensource",
+"vault_cacert": "/etc/ssl/joebloggs_all_ca",
+"vault_capath": "/etc/ssl/joebloggs_ca"
 }

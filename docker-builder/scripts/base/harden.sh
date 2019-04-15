@@ -3,7 +3,7 @@ set -x
 set -e
 
 # Set a message of the day.
-echo -e "\n\nHardened App container image built for ${APP_NAME} on $(date)." > /etc/motd
+echo -e "\n\nHardened App container image built for ${APP_NAME} application on $(date)." > /etc/motd
 
 # Remove any existing crontabs.
 rm -fr /var/spool/cron
@@ -14,6 +14,7 @@ rm -fr /etc/periodic
 find /sbin /usr/sbin ! -type d \
   -a ! -name nologin \
   -a ! -name ip \
+  -a ! -name nginx \
   -a ! -name su-exec \
   -delete
 
@@ -69,6 +70,18 @@ find $sysdirs -xdev \( \
   -name host -o \
   -name strings -o \
   -name su \
+  \) -delete
+
+# Remove other programs that could be dangerous/unnecessary in /usr/bin
+find /usr/bin -xdev \( \
+  -name make -o \
+  -name appletviewer -o \
+  \) -delete
+
+# Remove any app local configuration files
+find /opt/${APP_NAME} \( \
+  -name ".env*" -o \
+  -name "*.yml" -o \
   \) -delete
 
 # Remove init scripts since we do not use them.

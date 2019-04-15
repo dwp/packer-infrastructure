@@ -32,7 +32,7 @@ rtcsync
 logdir /var/log/chrony
 
 # Select which information is logged.
-#log measurements statistics tracking
+log measurements statistics tracking
 EOT
 
 # Configure chronyd options
@@ -42,6 +42,10 @@ EOT
 
 # Remove requiretty setting in sudoers if it exists
 sed -i -r "s@^.*requiretty@#Defaults !requiretty@" /etc/sudoers
+
+
+# Allow Burbank admins access to box
+echo "%burbank-admins ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/burbank-admins
 
 # Disable firstboot
 echo "RUN_FIRSTBOOT=NO" > /etc/sysconfig/firstboot
@@ -58,3 +62,9 @@ sed -i -r 's@^#NAutoVTs=.*@NAutoVTs=0@' /etc/systemd/logind.conf
 
 # 1.1.15-17
 echo "tmpfs /dev/shm tmpfs defaults,nodev,nosuid,noexec 0 0" >> /etc/fstab
+
+# Enable forward to syslog for Cloudwatch setup
+sed -i 's/^#ForwardToSyslog=yes/ForwardToSyslog=yes/' /etc/systemd/journald.conf
+
+# Add a team user
+useradd $OWNER -u $GUID -s /sbin/nologin -M

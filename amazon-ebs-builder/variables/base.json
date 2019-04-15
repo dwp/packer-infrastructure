@@ -1,0 +1,14 @@
+{
+"region": "eu-west-2",
+"account": "?????",
+"vpc_id": "vpc-?????",
+"subnet_id": "subnet-?????",
+"security_group_id": "sg-?????",
+"owner_name": "?????",
+"type": "base",
+"os_name": "centos",
+"os_version": "7",
+"volume_size": "25",
+"name": "Base CentOS 7",
+"description": "Resized & Patched Official CentOS 7 Image"
+}

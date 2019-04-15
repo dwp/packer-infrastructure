@@ -1,0 +1,96 @@
+{
+"variables": {
+    "environment": "{{env `environment`}}",
+    "version": "{{env `version`}}"
+},
+"builders": [
+    {
+      "type": "docker",
+      "image": "{{user `image`}}",
+      "run_command": ["-d", "-i", "-t", "{{.Image}}", "/bin/ash"],
+      "commit": true,
+      "changes": [
+      "ENV APP {{user `app_name`}}",
+      "ENV VERSION={{user `version`}}",
+      "ENV VAULT_CAPATH={{user `vault_capath`}}",
+      "ENV VAULT_CACERT={{user `vault_cacert`}}",
+      "ENV PROJECT={{user `short`}}",
+      "ENV APPTYPE={{user `family`}}",
+      "USER {{user `user`}}",
+      "LABEL MAINTAINER {{user `maintainer`}}",
+      "EXPOSE {{user `ports`}}",
+      "ENTRYPOINT [\"/usr/local/bin/tini\",\"--\",\"sh\",\"/usr/local/bin/docker-entrypoint.sh\"]",
+      "WORKDIR /opt/{{user `app_name`}}"
+    ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "{{user `app_name`}}-{{user `version`}}.tar",
+      "destination": "/tmp/app.tar"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+      "GID={{user `gid`}}",
+      "UID={{user `uid`}}",
+      "USER={{user `user`}}",
+      "GROUP={{user `group`}}",
+      "APPHOME=/opt/{{user `app_name`}}",
+      "APP={{user `app_name`}}",
+      "VERSION={{user `version`}}"
+      ],
+      "scripts": [
+        "scripts/{{user `family`}}/{{user `family`}}.sh"      ]
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+      "APP={{user `app_name`}}",
+      "DESTFILE={{user `dest_file`}}",
+      "APPTYPE={{user `family`}}"
+      ],
+      "scripts": [
+        "scripts/base/build-consul-template.sh"]
+    },
+    {
+      "type": "file",
+      "source": "files/common/process_certificate.py",
+      "destination": "/usr/local/bin/process_certificate.py"
+    },
+    {
+      "type": "file",
+      "source": "files/common/docker-entrypoint.sh",
+      "destination": "/usr/local/bin/docker-entrypoint.sh"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+      "USER={{user `user`}}",
+      "APP_NAME={{user `app_name`}}"
+      ],
+      "scripts": [
+        "scripts/base/harden.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "{{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com/{{user `owner`}}-{{user `project`}}-{{ user `environment`}}",
+        "tag": "{{ user `app_name`}}-{{ user `version`}}"
+      },
+      {
+        "type": "docker-push",
+        "login": false,
+        "login_server": "{{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com/{{user `owner`}}-{{user `project`}}-{{ user `environment`}}"
+      }
+    ],
+    {
+        "type": "shell-local",
+        "inline": ["docker rmi {{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com/{{user `owner`}}-{{user `project`}}-{{ user `environment`}}:{{ user `app_name`}}-{{ user `version`}}"]
+      }
+    ]
+  }

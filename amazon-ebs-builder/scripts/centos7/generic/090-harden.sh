@@ -286,23 +286,23 @@ echo "Creating Banner..."
 
 cat > /etc/issue.net << 'EOF'
 /------------------------------------------------------------------------------\
-|                       *** INSERT BANNER HERE ***                             |
+|                       *** NOTICE TO USERS ***                                |
 |                                                                              |
+|This computer must only be used in accordance with the UCFS Development and   |
+|Support environment Security operating Procedures (SyOPs).                    |
 |                                                                              |
+|Unauthorised use is a criminal offence under the Computer Misuse Act 1990.    |
+|Please read the SyOPs carefully before accessing the computer.                |
 |                                                                              |
+|Using this system constitutes acceptance by you of the provisions of the SyOPs|
+|with immediate effect.                                                        |
 |                                                                              |
+|The Department monitors and records the use of its computers for secure       |
+|effective system operation and for other lawful purposes, including emails and|
+|access to internet sites. Inappropriate use of the Department\'s computers may|
+|lead to disciplinary action and/or legal proceedings.                         |
 |                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
-|                                                                              |
+|Please ask your line manager to explain if you do not understand this message.|
 \------------------------------------------------------------------------------/
 EOF
 
@@ -318,24 +318,23 @@ HostKey /etc/ssh/ssh_host_rsa_key
 HostKey /etc/ssh/ssh_host_dsa_key
 HostKey /etc/ssh/ssh_host_ecdsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
-UsePrivilegeSeparation yes
-KeyRegenerationInterval 3600
-ServerKeyBits 2048
+AllowTcpForwarding no
+Compression no
+AllowAgentForwarding no
+UsePrivilegeSeparation sandbox
 SyslogFacility AUTH
-LogLevel INFO
+LogLevel VERBOSE
 ClientAliveInterval 300
 ClientAliveCountMax 0
 LoginGraceTime 60
 PermitRootLogin no
 StrictModes yes
-MaxAuthTries 4
-MaxSessions 10
-RSAAuthentication yes
+MaxAuthTries 2
+MaxSessions 2
 PubkeyAuthentication yes
 AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
 AuthorizedKeysCommandUser nobody
 IgnoreRhosts yes
-RhostsRSAAuthentication no
 HostbasedAuthentication no
 PermitEmptyPasswords no
 ChallengeResponseAuthentication no
@@ -347,7 +346,7 @@ X11Forwarding no
 X11DisplayOffset 10
 PrintMotd no
 PrintLastLog yes
-TCPKeepAlive yes
+TCPKeepAlive no
 Banner /etc/issue.net
 AcceptEnv LANG LC_* XMODIFIERS
 Subsystem sftp    /usr/libexec/openssh/sftp-server
@@ -630,6 +629,8 @@ kernel.dmesg_restrict = 1
 kernel.kptr_restrict = 2
 kernel.sysrq = 0
 kernel.yama.ptrace_scope = 1
+#Avoid ENOSPC when running PM2
+fs.inotify.max_user_watches=524288
 EOF
 
 echo "Ensuring YUM removes previous version...."

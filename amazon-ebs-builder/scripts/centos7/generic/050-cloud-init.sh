@@ -65,7 +65,7 @@ system_info:
   ssh_svcname: sshd
 
 datasource_list: [ Ec2, None ]
-
+preserve_hostname: true
 # vim:syntax=yaml
 EOF
 

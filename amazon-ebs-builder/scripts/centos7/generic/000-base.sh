@@ -54,8 +54,8 @@ zerombr
 clearpart --linux --initlabel
 
 # Create primary system partitions
-part /boot --fstype=xfs --size=512
-part pv.00 --grow --size=1
+part /boot --fstype=xfs --size=512 --ondisk=${drive}
+part pv.00 --grow --size=1 --ondisk=${drive}
 
 # Create a volume group
 volgroup vg00 --pesize=4096 pv.00
@@ -69,7 +69,10 @@ logvol /var/log --fstype="xfs" --size=3072 --name=log --vgname=vg00
 logvol /var/log/audit --fstype="xfs" --size=3072 --name=audit --vgname=vg00
 logvol /home --fstype="xfs" --size=2048 --name=home --vgname=vg00 --fsoptions=nodev
 # Application LV
-logvol /opt --fstype="xfs" --size=4096 --name=opt --vgname=vg00
+logvol /opt --fstype="xfs" --size=2048 --name=opt --vgname=vg00
+logvol /usr --fstype="xfs" --size=4096 --name=usr --vgname=vg00
+# Vault client
+logvol /vault_client --fstype="xfs" --size=512 --name=vault_client --vgname=vg00
 
 # Base Service configuration
 services --enabled=sshd

@@ -1,92 +1,80 @@
 {
-	"min_packer_version": "1.2.3",
-	"variables": {
-		"aws_access_key": "",
-		"aws_secret_key": "",
-		"aws_session_token": "",
-		"aws_accountid": "XXXXXX",
-		"owner_name": "XXXXXX",
-		"type": "ecs",
-		"os_name": "centos",
-		"os_version": "7",
-		"minor_version": ".5.1804",
-		"mirror_source": "http://mirror.centos.org/centos/",
-		"docker_version": "17.12.1",
-		"aws_instance_type": "t2.micro",
-		"ntp_source": "XXXXXX",
-		"internal_cidr": "XXXXXX",
-		"ipv4_forward": "1",
-		"app_ports": "XXXXXX,XXXXXX,XXXXXX:XXXXXX",
-		"aws_networks": "XXXXXX",
-		"ssh_allow": "centos XXXXXX XXXXXX ec2-user",
-		"guid": "XXXX",
-		"name": "ecs CentOS 7 miminal",
-		"description": "ecs CentOS 7"
-	},
-    "builders": [
+  "builders": [
         {
             "type": "amazon-ebs",
 						"ami_name": "{{user `owner_name`}}-{{user `os_name`}}-{{user `os_version`}}-{{user `type`}}-{{isotime \"2006-01-02-030405\" | clean_ami_name}}",
-			      "ami_description": "{{user `type`}} CentOS Linux 7 x86_64 HVM EBS (encrypted) {{isotime \"20060102\"}}",
-            "instance_type": "t2.small",
-						"vpc_id": "vpc-XXXXXX",
-						"subnet_id": "subnet-XXXXXX",
-            "region": "eu-west-2",
+			      "ami_description": "{{user `owner_name`}} {{user `type`}} {{user `os_name`}} {{user `os_version`}}HVM EBS (encrypted) {{isotime \"20060102\"}}",
+            "instance_type": "{{user `builder_type`}}",
+						"vpc_id": "{{user `vpc_id`}}",
+						"subnet_id": "{{user `subnet_id`}}",
+						"security_group_id": "{{user `security_group_id`}}",
+            "region": "{{user `region`}}",
+						"force_delete_snapshot": true,
             "source_ami_filter": {
                 "filters": {
-                    "name": "XXXXXX-centos-7-base*",
+                    "name": "{{user `owner_name`}}-{{user `os_name`}}-{{user `os_version`}}-base*",
                     "virtualization-type": "hvm"
                   },
 								"owners": "{{user `aws_accountid`}}",
                 "most_recent": true
             },
-						"ami_virtualization_type": "hvm",
+            "ami_virtualization_type": "hvm",
             "ssh_username": "centos",
             "ssh_file_transfer_method": "sftp",
             "associate_public_ip_address": false,
             "tags": {
-                "Name": "{{user `ami_name` | clean_ami_name}}",
-                "OS": "CentOS",
-                "OSVER": "7"
+                "Type": "{{user `type`}}",
+							  "OS Type": "{{user `os_name`}}",
+								"OS Version" : "{{user `os_version`}}{{user `minor_version`}}",
+                "Owner": "{{user `owner_name`}}",
+                "Build_date": "{{isotime \"2006-01-02-030405\" | clean_ami_name}}",
+								"vault-version": "{{user `vault_version`}}",
+								"vault-license": "{{user `vault_license`}}",
+                "consul-version": "{{user `consul_version`}}",
+                "consul-license": "{{user `consul_license`}}",
+                "consul-template-version": "{{user `consul_template_version`}}"
             },
-            "encrypt_boot": true,
-        		"launch_block_device_mappings": [{
-            			"device_name": "/dev/sde",
-            			"volume_size": 50,
-            			"volume_type": "gp2",
-          			  "delete_on_termination": true
-        		}],
-            "ami_block_device_mappings": [
-                {
-                    "device_name": "/dev/sda1",
-                    "volume_type": "gp2",
-                    "volume_size": 25,
-                    "encrypted": true,
-                    "delete_on_termination": true
+						"encrypt_boot": true,
+						"launch_block_device_mappings": [{
+									"device_name": "/dev/sde",
+									"volume_size": "{{user `docker_disk`}}",
+									"volume_type": "gp2",
+									"encrypted": true,
+									"delete_on_termination": true
+						}],
+						"ami_block_device_mappings": [
+								{
+										"device_name": "/dev/sda1",
+										"volume_type": "gp2",
+										"volume_size": "{{user `os_disk`}}",
+										"encrypted": true,
+										"delete_on_termination": true
 										},{
 										"device_name": "/dev/sde",
-	            			"volume_size": 50,
-	            			"volume_type": "gp2",
-	            			"delete_on_termination": true
+										"volume_size": "{{user `docker_disk`}}",
+										"volume_type": "gp2",
+										"delete_on_termination": true
 									}
-	            ],
-	            "communicator": "ssh",
-	            "ssh_pty": true
-	        }
-	    ],
-			"provisioners": [
+							],
+							"communicator": "ssh",
+							"ssh_pty": true
+						}
+						],
+    "provisioners": [
       {
 			"environment_vars": [
 				  "FULL_VERSION={{user `os_version`}}{{user `minor_version`}}",
 					"MIRROR_URL={{user `mirror_source`}}",
-					"NTP_SOURCE={{user `ntp_source`}}",
 					"IP_RANGE={{user `internal_cidr`}}",
 					"IPV4FORWARD={{user `ipv4_forward`}}",
-					"SSH_ALLOW={{user `ssh_allow`}}"
+					"NTP_SOURCE={{user `ntp_source`}}",
+					"SSH_ALLOW={{user `ssh_allow`}}",
+          "OWNER={{user `owner_name`}}",
+          "GUID={{user `guid`}}"
 				],
       "type": "shell",
       "expect_disconnect": "true",
-			"pause_before": "20s",
+			"pause_before": "60s",
       "execute_command": "echo 'centos'| {{.Vars}} sudo -S -E bash '{{.Path}}'",
       "start_retry_timeout": "15m",
       "scripts": [
@@ -101,7 +89,7 @@
 				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/090-harden.sh"
 			]
 			},
-	{
+			{
 			"type": "shell",
 			"execute_command": "echo 'centos'| {{.Vars}} sudo -S -E bash '{{.Path}}'",
 			"inline": [
@@ -115,26 +103,59 @@
 		      "source": "files/user_namespace.pp",
 		      "destination": "/tmp/user_namespace.pp"
 		    },
-    {
+			{
+				"environment_vars": [
+					  "ACCOUNT_ID={{user `aws_accountid`}}",
+						"REGION={{user `region`}}",
+						"ENCRYPTION_STATUS={{user `vault_encryption_status`}}",
+						"VAULT_VERSION={{user `vault_version`}}",
+						"VAULT_LICENSE={{user `vault_license`}}",
+            "CONSUL_VERSION={{user `consul_version`}}",
+            "CONSUL_LICENSE={{user `consul_license`}}",
+            "OWNER={{user `owner_name`}}",
+            "HASHICORP_GPG_KEY={{user `hashicorp_gpg_key`}}",
+            "CONSUL_TEMPLATE_VERSION={{user `consul_template_version`}}",
+						"OS_LOGS={{user `os_logs`}}",
+						"CONTAINER_LOGS={{user `container_logs`}}",
+						"AUDIT_LOGS={{user `audit_logs`}}",
+						"APP_LOGS={{user `app_logs`}}"
+					],
+				"type": "shell",
+				"expect_disconnect": "true",
+				"pause_before": "20s",
+				"execute_command": "echo 'centos'| {{.Vars}} sudo -S -E python '{{.Path}}'",
+				"scripts": [
+					"scripts/{{user `os_name`}}{{user `os_version`}}/generic/080-cloudwatchlogs-setup.py",
+					"scripts/{{user `os_name`}}{{user `os_version`}}/generic/085-ec2_vault_setup.py",
+          "scripts/{{user `os_name`}}{{user `os_version`}}/generic/086-ec2_consul_template.py",
+          "scripts/{{user `os_name`}}{{user `os_version`}}/generic/088-ec2_consul_setup.py"
+				]
+				},
+		{
 			"environment_vars": [
 					"NTP_SOURCE={{user `ntp_source`}}",
 					"IP_RANGE={{user `internal_cidr`}}",
-					"AWS={{user `aws_networks`}}",
+					"IPV4FORWARD={{user `ipv4_forward`}}",
 					"APP_PORTS={{user `app_ports`}}",
+					"VAULT_PORTS={{user `vault_ports`}}",
+          "CONSUL_PORTS={{user `consul_ports`}}",
+					"AWS={{user `aws_eu-west-2`}}",
 					"DOCKER_VERSION={{user `docker_version`}}",
 					"OWNER={{user `owner_name`}}",
-					"GUID={{user `guid`}}"
+					"GUID={{user `guid`}}",
+          "DOCKER_NETWORK={{user `docker_network`}}"
 				],
-      "type": "shell",
+			"type": "shell",
 			"expect_disconnect": "true",
 			"pause_before": "20s",
 			"execute_command": "echo 'centos'| {{.Vars}} sudo -S -E bash '{{.Path}}'",
 			"scripts": [
-				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/066-docker.sh",
-				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/076-harden-ecs.sh",
-				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/096-iptables.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/066-docker.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/076-harden-ecs.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/095-{{user `owner_name`}}-config.sh",
+				"scripts/{{user `os_name`}}{{user `os_version`}}/{{user `type`}}/097-iptables.sh",
 				"scripts/{{user `os_name`}}{{user `os_version`}}/generic/100-cleanup.sh"
-    ]
+		]
 	}
 ]
 }

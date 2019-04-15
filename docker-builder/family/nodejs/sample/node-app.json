@@ -1,0 +1,9 @@
+{
+"family": "nodejs",
+"project" : "uba",
+"short": "uba",
+"app_name": "node-app",
+"ports": "9020",
+"dest_file": "ecosystem.config.js",
+"source_path": "properties/server-config.ctmpl"
+}

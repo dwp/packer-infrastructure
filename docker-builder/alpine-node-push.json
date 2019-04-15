@@ -1,0 +1,55 @@
+{
+  "variables": {
+    "account": "{{env `account`}}",
+    "user": "{{env `user`}}",
+    "group": "{{env `group`}}",
+    "uid": "{{env `uid`}}",
+    "gid": "{{env `gid`}}",
+    "license": "{{ env `license`}}",
+    "consul_template_ver": "{{env `consul_template_ver`}}",
+    "vault_client_ver": "{{env `vault_client_ver`}}"
+  },
+  "builders": [
+    {
+      "type": "docker",
+      "image": "keymetrics/pm2:10-alpine",
+      "run_command": ["-d", "-i", "-t", "{{.Image}}", "/bin/ash"],
+      "commit": true
+  }
+],
+"provisioners": [
+  {
+    "type": "shell",
+    "environment_vars": [
+    "GID={{user `gid`}}",
+    "UID={{user `uid`}}",
+    "USER={{user `user`}}",
+    "GROUP={{user `group`}}",
+    "VAULT_LICENSE={{user `license`}}",
+    "VAULT_VERSION={{user `vault_client_ver`}}",
+    "CONSUL_TEMPLATE_VERSION={{user `consul_template_ver`}}"
+    ],
+    "scripts": [
+      "scripts/alpine/base.sh"
+    ]
+  }
+],
+"post-processors": [
+  [
+    {
+      "type": "docker-tag",
+      "repository": "{{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com/{{user `internal_repo`}}",
+      "tag": "{{user `owner`}}-alpine-node-latest"
+    },
+    {
+      "type": "docker-push",
+      "login": false,
+      "login_server": "https://{{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com/{{user `internal_repo`}}"
+    }
+  ],
+  {
+      "type": "shell-local",
+      "inline": ["docker rmi {{user `account`}}.dkr.ecr.eu-west-2.amazonaws.com/{{user `internal_repo`}}:{{user `owner`}}-alpine-node-latest"]
+  }
+]
+}

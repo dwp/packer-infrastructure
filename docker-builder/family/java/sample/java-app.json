@@ -1,0 +1,9 @@
+{
+"family": "java",
+"project" : "uba",
+"short" : "uba",
+"app_name": "test",
+"ports": "9017 9067",
+"dest_file": "docker.yml",
+"source_path": "properties/server-config.ctmpl"
+}

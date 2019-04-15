@@ -1,8 +1,0 @@
-{
-"family": "java",
-"image": "openjdk:8-jdk-alpine3.8",
-"project" : "my-project",
-"app_name":"myjavaapp",
-"version":"1.2.3",
-"ports": "9000-9003"
-}
